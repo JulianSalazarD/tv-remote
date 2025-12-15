@@ -1,0 +1,29 @@
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    color-scheme: dark;
+    --bg-color: #1a1b1e;
+    --surface-color: #25262b;
+    --accent-color: #3b5bdb; /* Azul vibrante */
+    --text-primary: #e0e0e0;
+    --text-secondary: #909296;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* Evita scroll elástico */
+    user-select: none; /* CRUCIAL: Evita seleccionar texto al pulsar */
+    -webkit-user-select: none;
+    touch-action: manipulation; /* Mejora respuesta táctil */
+}
+
+#app {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
