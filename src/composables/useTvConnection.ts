@@ -1,34 +1,34 @@
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 
-// Estado global simple
-const currentTvIp = ref<string | null>(null);
-const isConnected = ref(false);
+// Estado global (fuera de la función para que se comparta entre vistas)
+const currentTvIp = ref<string>(localStorage.getItem("saved_tv_ip") || "");
 
 export function useTvConnection() {
-  // Función para buscar TVs (Llama a Rust)
-  async function scanDevices() {
-    console.log("Escaneando...");
-    // Aquí invocaremos al comando 'scan_network' de Rust más adelante
-    // const devices = await invoke('scan_network');
-    // return devices;
+  // Guardar IP seleccionada
+  function selectTv(ip: string) {
+    currentTvIp.value = ip;
+    localStorage.setItem("saved_tv_ip", ip);
+    console.log("TV Seleccionada:", ip);
   }
 
-  // Función para enviar tecla
+  // Enviar tecla a Rust
   async function sendKey(key: string) {
-    if (!currentTvIp.value) return;
+    if (!currentTvIp.value) {
+      console.warn("No hay TV seleccionada");
+      return;
+    }
 
-    console.log(`Enviando ${key} a ${currentTvIp.value}`);
-    await invoke("send_command", {
-      ip: currentTvIp.value,
-      key: key,
-    });
+    try {
+      await invoke("send_key", { ip: currentTvIp.value, key: key });
+    } catch (e) {
+      console.error("Error enviando comando:", e);
+    }
   }
 
   return {
     currentTvIp,
-    isConnected,
-    scanDevices,
+    selectTv,
     sendKey,
   };
 }

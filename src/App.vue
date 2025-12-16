@@ -7,7 +7,7 @@ import ScanView from "./views/ScanView.vue";
 // Estado para controlar qué vista se muestra
 const currentTab = ref("remote"); // 'remote' | 'scan' | 'settings'
 
-// Un componente placeholder simple para ajustes
+// Componente placeholder simple para ajustes
 const SettingsPlaceholder = {
     template:
         '<div style="padding:20px"><h2>Ajustes</h2><p>Próximamente...</p></div>',
@@ -22,7 +22,7 @@ const SettingsPlaceholder = {
             </div>
 
             <div v-else-if="currentTab === 'scan'" key="scan">
-                <ScanView />
+                <ScanView @change-tab="(tab) => (currentTab = tab)" />
             </div>
 
             <div v-else-if="currentTab === 'settings'" key="settings">

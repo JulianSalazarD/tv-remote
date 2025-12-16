@@ -2,8 +2,18 @@
 import { ref, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { RefreshCw, Tv, Monitor } from "lucide-vue-next";
+// 1. Importamos el composable que maneja la conexión
+import { useTvConnection } from "../composables/useTvConnection";
 
-// Tipo idéntico al struct de Rust
+// 2. Definimos los eventos que este componente puede emitir hacia App.vue
+const emit = defineEmits<{
+    (e: "change-tab", tab: string): void;
+}>();
+
+// 3. Extraemos la función para guardar la TV
+const { selectTv } = useTvConnection();
+
+// Estructura de datos que viene de Rust
 interface TVDevice {
     id: string;
     name: string;
@@ -22,10 +32,7 @@ async function startScan() {
     errorMsg.value = "";
 
     try {
-        // Llamada a Rust
-        console.log("Invocando scan_devices...");
         const found = await invoke<TVDevice[]>("scan_devices");
-        console.log("Encontrados:", found);
         devices.value = found;
     } catch (e) {
         console.error(e);
@@ -35,7 +42,12 @@ async function startScan() {
     }
 }
 
-// Escanear automáticamente al entrar en la vista
+// 4. Función que se ejecuta al tocar una TV
+function handleSelectDevice(ip: string) {
+    selectTv(ip); // Guarda la IP en memoria y LocalStorage
+    emit("change-tab", "remote"); // Pide a App.vue que cambie a la vista del control
+}
+
 onMounted(() => {
     startScan();
 });
@@ -55,7 +67,7 @@ onMounted(() => {
                 v-for="device in devices"
                 :key="device.id"
                 class="device-card"
-                @click="console.log('Seleccionado:', device.ip)"
+                @click="handleSelectDevice(device.ip)"
             >
                 <div class="icon-box">
                     <Monitor v-if="device.model === 'Desconocido'" />
@@ -125,9 +137,12 @@ onMounted(() => {
     margin-bottom: 10px;
     cursor: pointer;
     transition: background 0.2s;
+    /* Feedback visual al tocar */
+    user-select: none;
 }
 .device-card:active {
     background: #373a40;
+    transform: scale(0.98);
 }
 
 .icon-box {
